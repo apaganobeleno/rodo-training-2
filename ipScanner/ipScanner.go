@@ -26,16 +26,16 @@ type iPInformation struct {
 type ErrorHandler struct{}
 
 func (error ErrorHandler) ServeHTTP(response http.ResponseWriter, request *http.Request) {
-	startIPScan(response, request)
-}
-
-//Receives the request that contain the client IP
-func startIPScan(response http.ResponseWriter, request *http.Request) {
 	if request.URL.Path != "/ip/details" {
 		jsonError := `{"Error":"404 Page not found"}`
 		io.WriteString(response, jsonError)
 		return
 	}
+	startIPScan(response, request)
+}
+
+//Receives the request that contain the client IP
+func startIPScan(response http.ResponseWriter, request *http.Request) {
 	information := scanIP(ipClient(request))
 	io.WriteString(response, information)
 }
