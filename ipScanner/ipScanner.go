@@ -2,8 +2,8 @@ package ipScanner
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
@@ -23,8 +23,19 @@ type iPInformation struct {
 	URL         string
 }
 
+type ErrorHandler struct{}
+
+func (error ErrorHandler) ServeHTTP(response http.ResponseWriter, request *http.Request) {
+	startIPScan(response, request)
+}
+
 //Receives the request that contain the client IP
-func StartIPScan(response http.ResponseWriter, request *http.Request) {
+func startIPScan(response http.ResponseWriter, request *http.Request) {
+	if request.URL.Path != "/ip/details" {
+		jsonError := `{"Error":"404 Page not found"}`
+		io.WriteString(response, jsonError)
+		return
+	}
 	information := scanIP(ipClient(request))
 	io.WriteString(response, information)
 }
@@ -57,7 +68,7 @@ func scanIP(IP string) string {
 	return ipInfo
 }
 
-//Stores the IP information in a string  
+//Stores the IP information in a string
 func processIPScanInformation(ipScanData []byte) string {
 
 	ipInformation := iPInformation{}
@@ -67,12 +78,10 @@ func processIPScanInformation(ipScanData []byte) string {
 	Longitude := strconv.FormatFloat(ipInformation.Longitude, 'f', 6, 64)
 	ipInformation.URL = "https://www.google.com.au/maps/@" + Latitude + "," + Longitude + "z"
 
-	ipInfo := "Host: "+ipInformation.IP+"\n"
-	ipInfo += "Country: "+ipInformation.CountryName+"\nRegion: "+ipInformation.RegionName+"\n"
-	ipInfo += "City: "+ipInformation.City+"\nZip Code: "+ipInformation.ZipCode+"\n"
-	ipInfo += "Time Zone: "+ipInformation.TimeZone+"\nLink to google maps with geolocation: "+ipInformation.URL
+	ipInfo := "Host: " + ipInformation.IP + "\n"
+	ipInfo += "Country: " + ipInformation.CountryName + "\nRegion: " + ipInformation.RegionName + "\n"
+	ipInfo += "City: " + ipInformation.City + "\nZip Code: " + ipInformation.ZipCode + "\n"
+	ipInfo += "Time Zone: " + ipInformation.TimeZone + "\nLink to google maps with geolocation: " + ipInformation.URL
 
 	return ipInfo
 }
-
-

@@ -1,12 +1,11 @@
 package main
 
 import (
-	"challenge2/ipScanner"
-	"log"
+	"challenge2/rodo-training-2/ipScanner"
 	"net/http"
 )
 
 func main() {
-	http.HandleFunc("/ip/details", ipScanner.StartIPScan)
-	log.Fatal(http.ListenAndServe(":12345", nil))
+	errorHandler := ipScanner.ErrorHandler{}
+	http.ListenAndServe(":12345", errorHandler)
 }
